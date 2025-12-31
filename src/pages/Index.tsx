@@ -11,8 +11,8 @@ const Index = () => {
   const [results, setResults] = useState<EHRResult[]>([]);
   const [stats, setStats] = useState({
     patientCount: 0,
-    encounterCount: 0,
-    avgEncountersPerPatient: 0,
+    noteCount: 0,
+    avgNotesPerPatient: 0,
   });
 
   const handleSearch = async (query: string) => {
@@ -72,16 +72,16 @@ const Index = () => {
                 description="Unique de-identified patients"
               />
               <StatCard
-                label="Total Encounters"
-                value={stats.encounterCount.toLocaleString()}
+                label="Total Notes"
+                value={stats.noteCount.toLocaleString()}
                 icon={<FileText className="h-5 w-5" />}
                 description="Across matched patients"
               />
               <StatCard
-                label="Avg. Encounters / Patient"
-                value={stats.avgEncountersPerPatient.toFixed(1)}
+                label="Avg. Notes / Patient"
+                value={stats.avgNotesPerPatient.toFixed(1)}
                 icon={<TrendingUp className="h-5 w-5" />}
-                description="Mean encounter frequency"
+                description="Mean note frequency"
               />
             </section>
 
