@@ -1,4 +1,5 @@
 import type { EHRResult } from "@/components/ResultsTable";
+import type { PatientRecord } from "@/components/PatientRecordsDialog";
 
 // Mock EHR data for demonstration
 const mockEHRDatabase = [
@@ -179,4 +180,29 @@ export function searchEHRs(query: string): {
         : 0,
     },
   };
+}
+
+// Get all records for a specific patient
+export function getPatientRecords(patientId: string): PatientRecord[] {
+  const patient = mockEHRDatabase.find(p => p.patientId === patientId);
+  
+  if (!patient) return [];
+  
+  // Generate mock dates for each encounter
+  const baseDate = new Date('2024-01-15');
+  
+  return patient.texts.map((text, index) => {
+    const encounterDate = new Date(baseDate);
+    encounterDate.setDate(baseDate.getDate() - (patient.texts.length - 1 - index) * 45);
+    
+    return {
+      encounterIndex: index + 1,
+      text,
+      date: encounterDate.toLocaleDateString('en-US', {
+        month: 'short',
+        day: 'numeric',
+        year: 'numeric',
+      }),
+    };
+  });
 }

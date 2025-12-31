@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   Table,
   TableBody,
@@ -8,6 +9,8 @@ import {
 } from "@/components/ui/table";
 import { HighlightedText } from "./HighlightedText";
 import { Badge } from "@/components/ui/badge";
+import { PatientRecordsDialog, type PatientRecord } from "./PatientRecordsDialog";
+import { getPatientRecords } from "@/lib/mockData";
 
 export interface EHRResult {
   patientId: string;
@@ -21,6 +24,17 @@ interface ResultsTableProps {
 }
 
 export function ResultsTable({ results }: ResultsTableProps) {
+  const [selectedPatient, setSelectedPatient] = useState<string | null>(null);
+  const [patientRecords, setPatientRecords] = useState<PatientRecord[]>([]);
+  const [dialogOpen, setDialogOpen] = useState(false);
+
+  const handleRowClick = (patientId: string) => {
+    const records = getPatientRecords(patientId);
+    setSelectedPatient(patientId);
+    setPatientRecords(records);
+    setDialogOpen(true);
+  };
+
   if (!results.length) return null;
 
   return (
@@ -46,8 +60,9 @@ export function ResultsTable({ results }: ResultsTableProps) {
             {results.map((result, index) => (
               <TableRow 
                 key={`${result.patientId}-${index}`}
-                className="group"
+                className="group cursor-pointer hover:bg-muted/50 transition-colors"
                 style={{ animationDelay: `${index * 50}ms` }}
+                onClick={() => handleRowClick(result.patientId)}
               >
                 <TableCell className="font-mono text-sm text-primary font-medium">
                   {result.patientId}
@@ -70,6 +85,13 @@ export function ResultsTable({ results }: ResultsTableProps) {
           </TableBody>
         </Table>
       </div>
+
+      <PatientRecordsDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        patientId={selectedPatient || ""}
+        records={patientRecords}
+      />
     </div>
   );
 }
