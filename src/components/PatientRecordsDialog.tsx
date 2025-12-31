@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
 
 export interface PatientRecord {
-  encounterIndex: number;
+  noteIndex: number;
   text: string;
   date: string;
 }
@@ -44,7 +44,7 @@ export function PatientRecordsDialog({
               {patientId}
             </Badge>
             <Badge variant="outline" className="ml-auto">
-              {records.length} encounters
+              {records.length} notes
             </Badge>
           </DialogTitle>
         </DialogHeader>
@@ -59,9 +59,9 @@ export function PatientRecordsDialog({
             </TableHeader>
             <TableBody>
               {records.map((record) => (
-                <TableRow key={record.encounterIndex}>
+                <TableRow key={record.noteIndex}>
                   <TableCell className="font-mono text-sm text-muted-foreground">
-                    {record.encounterIndex}
+                    {record.noteIndex}
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {record.date}

@@ -16,7 +16,7 @@ export interface EHRResult {
   patientId: string;
   matchedText: string;
   highlights: { start: number; end: number; term: string }[];
-  totalEncounters: number;
+  totalNotes: number;
 }
 
 interface ResultsTableProps {
@@ -53,7 +53,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
             <TableRow className="hover:bg-transparent">
               <TableHead className="w-[140px] font-semibold">Patient #</TableHead>
               <TableHead className="font-semibold">Matched EHR Text</TableHead>
-              <TableHead className="w-[120px] text-right font-semibold">Encounters</TableHead>
+              <TableHead className="w-[120px] text-right font-semibold">Notes</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -77,7 +77,7 @@ export function ResultsTable({ results }: ResultsTableProps) {
                 </TableCell>
                 <TableCell className="text-right">
                   <Badge variant="secondary" className="tabular-nums">
-                    {result.totalEncounters}
+                    {result.totalNotes}
                   </Badge>
                 </TableCell>
               </TableRow>
