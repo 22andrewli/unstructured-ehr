@@ -1,5 +1,6 @@
 import type { EHRResult } from "@/components/ResultsTable";
 import type { PatientRecord } from "@/components/PatientRecordsDialog";
+import type { SearchGroup, GroupOperator } from "@/components/SearchBar";
 
 // Mock EHR data for demonstration
 const mockEHRDatabase = [
@@ -92,29 +93,54 @@ function findTermMatches(
   return highlights;
 }
 
-function parseSearchQuery(query: string): { terms: string[]; operator: 'AND' | 'OR' } {
-  const upperQuery = query.toUpperCase();
-  
-  // Determine primary operator
-  const hasAnd = upperQuery.includes(' AND ');
-  const hasOr = upperQuery.includes(' OR ');
-  
-  // Extract terms
-  let terms = query
-    .split(/\s+(?:AND|OR|CONTAINS|INCLUDES)\s+/i)
-    .map(t => t.replace(/[()]/g, '').trim())
-    .filter(t => t.length > 0);
-  
-  // Remove operator keywords that might be standalone
-  terms = terms.filter(t => !['AND', 'OR', 'CONTAINS', 'INCLUDES'].includes(t.toUpperCase()));
-  
-  return {
-    terms,
-    operator: hasAnd ? 'AND' : 'OR',
-  };
+function textMatchesGroup(text: string, group: SearchGroup): boolean {
+  const textLower = text.toLowerCase();
+  return group.terms.some(term => textLower.includes(term.toLowerCase()));
 }
 
-export function searchEHRs(query: string): {
+function evaluateGroupsOnText(
+  text: string, 
+  groups: SearchGroup[], 
+  operators: GroupOperator[]
+): boolean {
+  if (groups.length === 0) return false;
+  if (groups.length === 1) return textMatchesGroup(text, groups[0]);
+
+  // Start with the first group's result
+  let result = textMatchesGroup(text, groups[0]);
+
+  // Apply each operator with the next group
+  for (let i = 0; i < operators.length; i++) {
+    const nextGroupMatch = textMatchesGroup(text, groups[i + 1]);
+    const operator = operators[i];
+
+    switch (operator) {
+      case "INCLUDING":
+        // Both must match (AND)
+        result = result && nextGroupMatch;
+        break;
+      case "OR":
+        // Either can match
+        result = result || nextGroupMatch;
+        break;
+      case "EXCLUDING":
+        // First must match, second must NOT match (AND NOT)
+        result = result && !nextGroupMatch;
+        break;
+    }
+  }
+
+  return result;
+}
+
+function getAllTermsFromGroups(groups: SearchGroup[]): string[] {
+  return groups.flatMap(group => group.terms);
+}
+
+export function searchEHRs(
+  groups: SearchGroup[],
+  operators: GroupOperator[]
+): {
   results: EHRResult[];
   stats: {
     patientCount: number;
@@ -122,34 +148,24 @@ export function searchEHRs(query: string): {
     avgNotesPerPatient: number;
   };
 } {
-  const { terms, operator } = parseSearchQuery(query);
-  
-  if (terms.length === 0) {
+  if (groups.length === 0) {
     return {
       results: [],
       stats: { patientCount: 0, noteCount: 0, avgNotesPerPatient: 0 },
     };
   }
 
+  const allTerms = getAllTermsFromGroups(groups);
   const matchedResults: EHRResult[] = [];
   const matchedPatients = new Set<string>();
   let totalNotes = 0;
 
   mockEHRDatabase.forEach((patient) => {
     patient.texts.forEach((text) => {
-      const textLower = text.toLowerCase();
-      
-      // Check if text matches based on operator
-      const termMatches = terms.map(term => 
-        textLower.includes(term.toLowerCase())
-      );
-      
-      const isMatch = operator === 'AND' 
-        ? termMatches.every(m => m)
-        : termMatches.some(m => m);
+      const isMatch = evaluateGroupsOnText(text, groups, operators);
 
       if (isMatch) {
-        const highlights = findTermMatches(text, terms);
+        const highlights = findTermMatches(text, allTerms);
         
         if (highlights.length > 0) {
           matchedResults.push({
