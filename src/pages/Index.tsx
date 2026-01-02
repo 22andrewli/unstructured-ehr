@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Users, FileText, TrendingUp, Database } from "lucide-react";
-import { SearchBar } from "@/components/SearchBar";
+import { SearchBar, type SearchGroup, type GroupOperator } from "@/components/SearchBar";
 import { StatCard } from "@/components/StatCard";
 import { ResultsTable, type EHRResult } from "@/components/ResultsTable";
 import { searchEHRs } from "@/lib/mockData";
@@ -15,13 +15,13 @@ const Index = () => {
     avgNotesPerPatient: 0,
   });
 
-  const handleSearch = async (query: string) => {
+  const handleSearch = async (groups: SearchGroup[], operators: GroupOperator[]) => {
     setIsLoading(true);
     
     // Simulate network delay for realism
     await new Promise((resolve) => setTimeout(resolve, 600));
     
-    const searchResults = searchEHRs(query);
+    const searchResults = searchEHRs(groups, operators);
     setResults(searchResults.results);
     setStats(searchResults.stats);
     setHasSearched(true);
