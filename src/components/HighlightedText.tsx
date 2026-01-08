@@ -37,7 +37,7 @@ export function HighlightedText({ text, highlights }: HighlightedTextProps) {
   }, [text, highlights]);
 
   return (
-    <span className="text-sm leading-relaxed">
+    <span className="text-sm leading-relaxed whitespace-pre-wrap">
       {segments.map((segment, i) =>
         segment.highlighted ? (
           <mark
