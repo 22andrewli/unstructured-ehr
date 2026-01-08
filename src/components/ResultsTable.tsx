@@ -67,8 +67,8 @@ export function ResultsTable({ results }: ResultsTableProps) {
                 <TableCell className="font-mono text-sm text-primary font-medium">
                   {result.patientId}
                 </TableCell>
-                <TableCell className="max-w-2xl">
-                  <div className="py-1">
+                <TableCell className="max-w-2xl p-2">
+                  <div className="h-24 overflow-y-auto py-1 pr-2 scrollbar-thin">
                     <HighlightedText 
                       text={result.matchedText} 
                       highlights={result.highlights} 
